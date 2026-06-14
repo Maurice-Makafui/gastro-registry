@@ -1,0 +1,144 @@
+services:
+  # ─────────────────────────────────────────────────────────────
+  # PostgreSQL Database
+  # ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: gastro_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gastro_user
+      POSTGRES_PASSWORD: gastro_pass
+      POSTGRES_DB: gastro_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gastro_user -d gastro_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - gastro_net
+
+  # ─────────────────────────────────────────────────────────────
+  # Redis Broker
+  # ─────────────────────────────────────────────────────────────
+  redis:
+    image: redis:alpine
+    container_name: gastro_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - gastro_net
+
+  # ─────────────────────────────────────────────────────────────
+  # FastAPI Backend
+  # ─────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gastro_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://gastro_user:gastro_pass@postgres:5432/gastro_db
+      SECRET_KEY: change-me-in-production-use-32-char-minimum-secret
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 480
+      ENVIRONMENT: production
+      CORS_ORIGINS: http://localhost:3000,http://frontend:3000
+      SEED_ADMIN_PASSWORD: admin123
+      SEED_DOCTOR_PASSWORD: doctor123
+      SEED_NURSE_PASSWORD: nurse123
+      SEED_HEPATO_PASSWORD: hepato123
+      SEED_REFERRER_PASSWORD: referrer123
+      REDIS_URL: redis://redis:6379/0
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: noreply@gastro.gh
+      SMTP_PASSWORD: change-me-smtp-password
+      SMTP_FROM: "GastroRef Ghana <noreply@gastro.gh>"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gastro_net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ─────────────────────────────────────────────────────────────
+  # Celery Worker
+  # ─────────────────────────────────────────────────────────────
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gastro_celery
+    restart: unless-stopped
+    command: celery -A app.core.celery_app worker --loglevel=info --queues=notifications --concurrency=2
+    environment:
+      DATABASE_URL: postgresql://gastro_user:gastro_pass@postgres:5432/gastro_db
+      SECRET_KEY: change-me-in-production-use-32-char-minimum-secret
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 480
+      ENVIRONMENT: production
+      REDIS_URL: redis://redis:6379/0
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: noreply@gastro.gh
+      SMTP_PASSWORD: change-me-smtp-password
+      SMTP_FROM: "GastroRef Ghana <noreply@gastro.gh>"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - gastro_net
+
+  # ─────────────────────────────────────────────────────────────
+  # Next.js Frontend
+  # ─────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: gastro_frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - gastro_net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  gastro_net:
+    driver: bridge
