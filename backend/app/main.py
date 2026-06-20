@@ -90,3 +90,8 @@ app.include_router(members.router)
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "service": "Gastro Referral API", "version": "2.1.0"}
+
+
+@app.get("/debug/cors")
+def debug_cors():
+    return {"cors_origins": settings.cors_origins_list, "frontend_url": settings.FRONTEND_URL}
