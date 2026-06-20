@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
+  // "standalone" output is for Docker/self-hosted only — not compatible with Vercel.
   async rewrites() {
     return [
       {

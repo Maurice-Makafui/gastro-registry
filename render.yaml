@@ -1,5 +1,6 @@
 services:
-  # ── Backend ────────────────────────────────────────────────────────────────
+  # ── Backend (Render Web Service) ───────────────────────────────────────────
+  # Frontend is deployed to Vercel — NOT listed here.
   - type: web
     name: gastro-referral-api
     runtime: python
@@ -15,15 +16,15 @@ services:
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "60"
-      # ── Set these in the Render dashboard (never commit real values) ──────
+      # ── Set these in the Render dashboard — never commit real values ───────
       - key: DATABASE_URL
-        sync: false
+        sync: false   # postgresql+psycopg://USER:PASSWORD@HOST:6543/postgres?sslmode=require
       - key: SECRET_KEY
         sync: false
       - key: CORS_ORIGINS
-        sync: false          # e.g. https://gastro-referral-frontend.onrender.com,http://localhost:3000
+        sync: false   # https://your-app.vercel.app,http://localhost:3000
       - key: FRONTEND_URL
-        sync: false          # e.g. https://gastro-referral-frontend.onrender.com
+        sync: false   # https://your-app.vercel.app
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_ANON_KEY
@@ -44,10 +45,10 @@ services:
         sync: false
       - key: SEED_REFERRER_PASSWORD
         sync: false
-      # ── Optional — only set if you use Redis/Celery on Render ────────────
+      # ── Uncomment if Redis/Celery is active on Render ─────────────────────
       # - key: REDIS_URL
       #   sync: false
-      # ── Optional — only set if email is active ───────────────────────────
+      # ── Uncomment if SMTP email is active ────────────────────────────────
       # - key: SMTP_HOST
       #   sync: false
       # - key: SMTP_PORT
@@ -58,25 +59,3 @@ services:
       #   sync: false
       # - key: SMTP_FROM
       #   sync: false
-
-  # ── Frontend ───────────────────────────────────────────────────────────────
-  - type: web
-    name: gastro-referral-frontend
-    runtime: node
-    rootDir: frontend
-    buildCommand: npm install --legacy-peer-deps && npm run build
-    startCommand: npm run start
-    autoDeploy: true
-    envVars:
-      # ── Set these in the Render dashboard ────────────────────────────────
-      - key: NEXT_PUBLIC_API_URL
-        sync: false          # e.g. https://gastro-referral-api.onrender.com
-      - key: NEXT_PUBLIC_SUPABASE_URL
-        sync: false
-      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
-        sync: false
-      # Optional cosmetic vars (safe to hard-code)
-      - key: NEXT_PUBLIC_APP_NAME
-        value: "Gastro Referral System"
-      - key: NEXT_PUBLIC_APP_VERSION
-        value: "2.1.0"
