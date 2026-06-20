@@ -10,19 +10,28 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-_is_pooled = "pgbouncer" in settings.DATABASE_URL or settings.ENVIRONMENT == "production"
-
-# Log DB host only (never the full URL / password)
+_parsed_url = None
 try:
     from urllib.parse import urlparse
-    _db_host = urlparse(settings.DATABASE_URL).hostname or "unknown"
-    logger.info("Database host: %s (pooled=%s)", _db_host, _is_pooled)
+    _parsed_url = urlparse(settings.DATABASE_URL)
 except Exception:
     pass
+
+# Port 6543 = Supabase transaction-mode pooler (PgBouncer); prepared statements not supported.
+_is_pooled = (
+    "pgbouncer" in settings.DATABASE_URL
+    or settings.ENVIRONMENT == "production"
+    or (bool(_parsed_url) and _parsed_url.port == 6543)
+)
+
+logger.info("Database host: %s (pooled=%s)", _parsed_url.hostname if _parsed_url else "unknown", _is_pooled)
+
+_connect_args = {"prepare_threshold": 0} if _is_pooled else {}
 
 engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
+    connect_args=_connect_args,
     **({"poolclass": NullPool} if _is_pooled else {"pool_size": 10, "max_overflow": 20}),
 )
 

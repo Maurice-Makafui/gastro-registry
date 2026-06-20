@@ -45,7 +45,10 @@ class Settings(BaseSettings):
             origins.append(self.FRONTEND_URL)
         return origins
 
-    model_config = {"env_file": str(ENV_FILE), "extra": "ignore"}
+    model_config = {
+        "env_file": str(ENV_FILE) if ENV_FILE.exists() else None,
+        "extra": "ignore",
+    }
 
 
 settings = Settings()
