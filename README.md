@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-# gastro-registry
-A clinical workflow and registry platform for gastroenterology and hepatology specialists, enabling referral coordination, patient tracking, endoscopy reporting, and disease registries across multiple healthcare facilities.
-=======
 # 🏥 Gastro Referral & Registry System
 
-A production-ready clinical workflow platform for **gastroenterology and hepatology specialists in Ghana**. Built for real-world use in Ghanaian clinics.
+A production-ready clinical workflow platform for **gastroenterology and hepatology specialists in Ghana**.
 
 ---
 
@@ -13,162 +9,73 @@ A production-ready clinical workflow platform for **gastroenterology and hepatol
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        BROWSER / MOBILE                         │
-│                     Next.js 14  (port 3000)                     │
+│               Next.js 14 — Vercel  (port 3000)                  │
 └─────────────────────────┬───────────────────────────────────────┘
                           │ HTTP / REST (JWT)
 ┌─────────────────────────▼───────────────────────────────────────┐
-│                    FastAPI Backend (port 8000)                   │
+│              FastAPI Backend — Render  (port 8000)              │
 │   Auth · Patients · Referrals · Doctor · Follow-ups · Analytics │
 │                    Rule-based Triage Engine                      │
 └─────────────────────────┬───────────────────────────────────────┘
-                          │ SQLAlchemy ORM
+                          │ SQLAlchemy ORM (psycopg v3)
 ┌─────────────────────────▼───────────────────────────────────────┐
-│                 PostgreSQL 16  (port 5432)                       │
+│            Supabase PostgreSQL  (port 5432)                     │
 │   users · patients · referrals · consultations · followups      │
+└─────────────────────────────────────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────────┐
+│                    Supabase Storage                             │
+│              Endoscopy images · PDF reports                     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 **Stack:**
+
 | Layer    | Technology |
 |----------|-----------|
-| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS |
-| Backend  | Python 3.11, FastAPI, SQLAlchemy 2, Alembic |
-| Database | PostgreSQL 16 |
+| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS — **Vercel** |
+| Backend  | Python 3.11, FastAPI, SQLAlchemy 2, Alembic — **Render** |
+| Database | Supabase PostgreSQL |
+| Storage  | Supabase Storage |
 | Auth     | JWT (python-jose), bcrypt password hashing |
-| DevOps   | Docker, Docker Compose |
 
 ---
 
-## 🚀 Quick Start (One Command)
+## 🚀 Quick Start (Docker — Local)
 
 ```bash
-# 1. Clone / unzip the project
 cd gastro-referral-system
-
-# 2. Copy environment files
 cp frontend/.env.example frontend/.env.local
 cp backend/.env.example backend/.env
-
-# 3. Build and start everything
 docker-compose up --build
-
-# App will be available at:
-#   Frontend  →  http://localhost:3000
-#   Backend   →  http://localhost:8000
-#   API Docs  →  http://localhost:8000/docs
+# Frontend → http://localhost:3000
+# Backend  → http://localhost:8000
+# API Docs → http://localhost:8000/docs
 ```
-
-The database is **auto-migrated** and **seeded** on first boot.
 
 ---
 
 ## 🔑 Demo Credentials
 
-| Role   | Email                 | Password   | Redirects to         |
-|--------|-----------------------|------------|----------------------|
-| Admin  | admin@gastro.gh       | admin123   | /admin/dashboard     |
-| Doctor | doctor@gastro.gh      | doctor123  | /doctor/dashboard    |
-| Nurse  | nurse@gastro.gh       | nurse123   | /nurse/intake        |
+| Role   | Email            | Password  |
+|--------|------------------|-----------|
+| Admin  | admin@gastro.gh  | admin123  |
+| Doctor | doctor@gastro.gh | doctor123 |
+| Nurse  | nurse@gastro.gh  | nurse123  |
 
 ---
 
-## 📁 Project Structure
-
-```
-gastro-referral-system/
-│
-├── frontend/                    # Next.js 14 App Router
-│   ├── app/
-│   │   ├── auth/login/          # Login page
-│   │   ├── nurse/
-│   │   │   ├── intake/          # Patient intake + referral form
-│   │   │   └── triage-result/   # Triage outcome display
-│   │   ├── doctor/
-│   │   │   ├── dashboard/       # Referrals list + filters
-│   │   │   └── referral/[id]/   # Referral detail + consultation form
-│   │   ├── admin/
-│   │   │   └── dashboard/       # Analytics dashboard (charts)
-│   │   └── patient/[id]/        # Full patient record
-│   ├── components/              # Shared UI components
-│   ├── lib/                     # API client, auth utils
-│   └── types/                   # TypeScript interfaces
-│
-├── backend/                     # FastAPI application
-│   └── app/
-│       ├── core/
-│       │   ├── config.py        # Settings (pydantic-settings)
-│       │   ├── security.py      # JWT, bcrypt, RBAC
-│       │   └── triage.py        # Rule-based triage engine ⭐
-│       ├── models/              # SQLAlchemy ORM models
-│       ├── routers/             # API route handlers
-│       ├── schemas.py           # Pydantic request/response schemas
-│       ├── database.py          # DB session + Base
-│       ├── seed.py              # Demo user seeding
-│       └── main.py              # FastAPI app + lifespan
-│
-├── database/
-│   └── init.sql                 # Schema, indexes, triggers, seed patients
-│
-├── docker-compose.yml           # Full stack orchestration
-└── README.md
-```
-
----
-
-## 🧠 Triage Engine (Rule-Based)
-
-Located at `backend/app/core/triage.py`. Classifies each referral automatically:
-
-| Symptom | Risk Level |
-|---------|-----------|
-| Vomiting blood (haematemesis) | 🔴 HIGH |
-| Black/tarry stool (melaena) | 🔴 HIGH |
-| Jaundice | 🔴 HIGH |
-| Rectal bleeding | 🔴 HIGH |
-| Abdominal pain | 🟡 MEDIUM |
-| Dysphagia | 🟡 MEDIUM |
-| Chronic diarrhoea | 🟡 MEDIUM |
-| Weight loss | 🟡 MEDIUM |
-| Mild nausea, bloating, heartburn | 🟢 LOW |
-
-Critical vitals (BP < 90 systolic, HR > 120 bpm, SpO₂ < 94%) automatically escalate to **HIGH**.
-
----
-
-## 🌐 API Reference
-
-Interactive Swagger docs: `http://localhost:8000/docs`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/login` | Get JWT token |
-| GET | `/auth/me` | Current user |
-| POST | `/patients/create` | Register patient |
-| GET | `/patients/` | Search patients |
-| GET | `/patients/{id}` | Patient detail |
-| POST | `/referrals/create` | Create referral (triggers triage) |
-| GET | `/referrals/list` | List referrals (filterable) |
-| GET | `/referrals/{id}` | Referral detail |
-| PUT | `/referrals/{id}` | Update referral status |
-| GET | `/doctor/referrals` | Doctor's referral queue |
-| POST | `/doctor/update-case` | Add consultation |
-| POST | `/followups/create` | Schedule follow-up |
-| GET | `/followups/` | List follow-ups |
-| GET | `/analytics/summary` | Dashboard analytics |
-
----
-
-## 🛠 Local Development (Without Docker)
+## 🛠 Local Development
 
 ### Backend
 
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate       # Windows: venv\Scripts\activate
+venv\Scripts\activate          # Windows
 pip install -r requirements.txt
-cp .env.example .env           # Edit DATABASE_URL to point to local Postgres
-python run.py
+cp .env.example .env           # fill in DATABASE_URL pointing to local/Supabase Postgres
+uvicorn app.main:app --reload
 # API at http://localhost:8000
 ```
 
@@ -182,14 +89,52 @@ npm run dev
 # App at http://localhost:3000
 ```
 
-### Database (local Postgres)
+### Database Migration
 
 ```bash
-psql -U postgres -c "CREATE DATABASE gastro_db;"
-psql -U postgres -c "CREATE USER gastro_user WITH PASSWORD 'gastro_pass';"
-psql -U postgres -c "GRANT ALL ON DATABASE gastro_db TO gastro_user;"
-psql -U gastro_user -d gastro_db -f database/init.sql
+cd backend
+alembic upgrade head
 ```
+
+---
+
+## 🚢 Production Deployment
+
+### Deploy Frontend — Vercel
+
+1. Push repo to GitHub.
+2. Import project in [Vercel](https://vercel.com/new).
+3. Set **Root Directory** to `frontend`.
+4. Add environment variables from `frontend/.env.example`.
+5. Deploy — Vercel auto-deploys on every push to `main`.
+
+### Deploy Backend — Render
+
+1. Push repo to GitHub.
+2. Create a new **Web Service** in [Render](https://render.com), or connect via `render.yaml`.
+3. Set **Root Directory** to `backend`.
+4. Add all environment variables from `backend/.env.example`.
+5. Render auto-deploys on every push to `main` (`autoDeploy: true`).
+6. Health check endpoint: `GET /health`
+
+### Database — Supabase PostgreSQL
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. Copy the **Session Mode** connection string (port `5432`) into `DATABASE_URL`:
+   ```
+   DATABASE_URL=postgresql+psycopg://USER:PASSWORD@HOST:5432/postgres
+   ```
+3. Run migrations against Supabase:
+   ```bash
+   cd backend
+   alembic upgrade head
+   ```
+
+### File Storage — Supabase Storage
+
+1. Create buckets (e.g. `endoscopy-images`, `reports`) in the Supabase dashboard.
+2. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in backend env vars.
+3. Use `app/services/storage_service.py` — `upload_image()`, `upload_pdf()`, `delete_file()`.
 
 ---
 
@@ -197,93 +142,57 @@ psql -U gastro_user -d gastro_db -f database/init.sql
 
 ### Backend (`backend/.env`)
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `postgresql://...` | PostgreSQL connection string |
-| `SECRET_KEY` | — | JWT signing key (≥32 chars) |
-| `ALGORITHM` | `HS256` | JWT algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `480` | Session duration (8h) |
-| `CORS_ORIGINS` | `http://localhost:3000` | Allowed frontend origins |
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | `postgresql+psycopg://USER:PASSWORD@HOST:PORT/postgres` |
+| `SECRET_KEY` | JWT signing key (≥ 32 chars) |
+| `ALGORITHM` | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Session duration (default `60`) |
+| `CORS_ORIGINS` | Comma-separated allowed origins |
+| `FRONTEND_URL` | Production Vercel URL |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) |
 
 ### Frontend (`frontend/.env.local`)
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Backend API URL |
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | Render backend URL |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
 
 ---
 
-## 🐳 Docker Commands
+## 🧠 Triage Engine
 
-```bash
-# Start everything
-docker-compose up --build
+Located at `backend/app/core/triage.py`. Auto-classifies every referral:
 
-# Run in background
-docker-compose up -d --build
+| Symptom | Risk |
+|---------|------|
+| Haematemesis, Melaena, Jaundice, Rectal bleeding | 🔴 HIGH |
+| Abdominal pain, Dysphagia, Chronic diarrhoea, Weight loss | 🟡 MEDIUM |
+| Nausea, Bloating, Heartburn | 🟢 LOW |
 
-# View logs
-docker-compose logs -f backend
-docker-compose logs -f frontend
-
-# Stop everything
-docker-compose down
-
-# Stop and remove volumes (resets database)
-docker-compose down -v
-
-# Rebuild a single service
-docker-compose up -d --build backend
-```
+Critical vitals (BP < 90 systolic, HR > 120 bpm, SpO₂ < 94%) auto-escalate to HIGH.
 
 ---
 
 ## 📋 Clinical Workflow
 
 ```
-Nurse logs in
-    │
-    ▼
-/nurse/intake
-    │  Registers patient (name, age, sex, vitals)
-    │  Selects symptoms from checklist
-    │  Submits referral
-    │
-    ▼
-Triage Engine (backend)
-    │  Evaluates symptom severity
-    │  Assigns HIGH / MEDIUM / LOW risk
-    │
-    ▼
-/nurse/triage-result
-    │  Shows risk classification
-    │  Recommends urgency level
-    │
-    ▼
-Doctor logs in → /doctor/dashboard
-    │  Sees all incoming referrals
-    │  Filters by status / risk
-    │  Clicks referral to review
-    │
-    ▼
-/doctor/referral/[id]
-    │  Reviews symptoms, vitals, patient history
-    │  Adds consultation (diagnosis, plan, outcome)
-    │  Schedules follow-up if needed
-    │
-    ▼
-/admin/dashboard
-    Visualises referral volumes, risk distribution,
-    status breakdown, upcoming follow-ups
+Nurse → /nurse/intake → Triage Engine → /nurse/triage-result
+Doctor → /doctor/dashboard → /doctor/referral/[id] → Consultation
+Admin  → /admin/dashboard → Analytics
 ```
 
 ---
 
-## 🩺 About
+## 🐳 Docker Commands
 
-Built for Ghana's gastroenterology and hepatology clinical workflow. Designed to be:
-- **Fast** — minimal typing, checklist-driven UI
-- **Role-aware** — nurses, doctors, and admins see different views
-- **Triage-first** — every referral is automatically risk-stratified
-- **Scalable** — containerised, production-grade architecture
->>>>>>> b90cd7a (chore: initial full repo push)
+```bash
+docker-compose up --build          # start all services
+docker-compose up -d --build       # background
+docker-compose logs -f backend
+docker-compose down -v             # stop + wipe volumes
+```

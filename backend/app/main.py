@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     try:
         run_migrations()
     except Exception as e:
-        # In production (Render/Neon), failing migrations must not be silent.
+        # In production (Render), failing migrations must not be silent.
         # This prevents the app from starting with an out-of-date schema.
         import logging
 

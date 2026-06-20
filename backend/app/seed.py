@@ -54,7 +54,44 @@ DEMO_FACILITIES = [
         "phone": "+233312345678",
         "metadata": {},
     },
+    {
+        "facility_name": "Briteaid Health Specialist clinic",
+        "facility_type": FacilityType.PRIVATE,
+        "region": "Ashanti Region",
+        "city": "Kumasi",
+        "email": "",
+        "phone": "",
+        "metadata": {"specialty_focus": "hepatology", "specialties": ["Gastroenterology"]},
+    },
+    {
+        "facility_name": "Iaama Health",
+        "facility_type": FacilityType.PRIVATE,
+        "region": "Ashanti Region",
+        "city": "Kumasi",
+        "email": "",
+        "phone": "",
+        "metadata": {},
+    },
+    {
+        "facility_name": "Walter Aiden",
+        "facility_type": FacilityType.PRIVATE,
+        "region": "Greater Accra",
+        "city": "Accra",
+        "email": "",
+        "phone": "",
+        "metadata": {},
+    },
+    {
+        "facility_name": "Oak Spelcialist Hospital",
+        "facility_type": FacilityType.HOSPITAL,
+        "region": "Greater Accra",
+        "city": "Accra",
+        "email": "",
+        "phone": "",
+        "metadata": {},
+    },
 ]
+
 
 DEMO_USERS = [
     {
@@ -66,7 +103,7 @@ DEMO_USERS = [
         "facility_index": 0,
     },
     {
-        "name": "Dr. Kwame Asante",
+        "name": "Dr. Bright Oppong",
         "email": "doctor@gastro.gh",
         "password_env": "SEED_DOCTOR_PASSWORD",
         "role": UserRole.GASTROENTEROLOGIST,
@@ -82,7 +119,7 @@ DEMO_USERS = [
         "facility_index": 1,
     },
     {
-        "name": "Dr. Kofi Referrer",
+        "name": "Dr. Kofi Duodo",
         "email": "referrer@gastro.gh",
         "password_env": "SEED_REFERRER_PASSWORD",
         "role": UserRole.REFERRING_PHYSICIAN,

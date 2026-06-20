@@ -1,0 +1,61 @@
+2026-06-20 01:23:05 | ERROR | app.main | Alembic migrations failed: Path doesn't exist: alembic.  Please use the 'init' command to create a new scripts folder.
+Traceback (most recent call last):
+  File "C:\Users\HP\Documents\gastro-referral-system\backend\app\main.py", line 36, in lifespan
+    run_migrations()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Documents\gastro-referral-system\backend\app\database.py", line 58, in run_migrations
+    command.upgrade(alembic_cfg, "head")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\command.py", line 463, in upgrade
+    script = ScriptDirectory.from_config(config)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\script\base.py", line 186, in from_config
+    return ScriptDirectory(
+        util.coerce_resource_to_filename(script_location),
+    ...<12 lines>...
+        messaging_opts=config.messaging_opts,
+    )
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\script\base.py", line 105, in __init__
+    raise util.CommandError(
+    ...<3 lines>...
+    )
+alembic.util.exc.CommandError: Path doesn't exist: alembic.  Please use the 'init' command to create a new scripts folder.
+2026-06-20 01:24:18 | ERROR | app.main | Alembic migrations failed: invalid interpolation syntax in 'postgresql+psycopg://postgres.hjkhtdxpfbstsgjavtpk:gastro123%40123@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require' at position 60
+Traceback (most recent call last):
+  File "C:\Users\HP\Documents\gastro-referral-system\backend\app\main.py", line 36, in lifespan
+    run_migrations()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Documents\gastro-referral-system\backend\app\database.py", line 60, in run_migrations
+    command.upgrade(alembic_cfg, "head")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\command.py", line 483, in upgrade
+    script.run_env()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\script\base.py", line 545, in run_env
+    util.load_python_file(self.dir, "env.py")
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\util\pyfiles.py", line 116, in load_python_file
+    module = load_module_py(module_id, path)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\util\pyfiles.py", line 136, in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\HP\Documents\gastro-referral-system\backend\alembic\env.py", line 23, in <module>
+    config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\config.py", line 358, in set_main_option
+    self.set_section_option(self.config_ini_section, name, value)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\site-packages\alembic\config.py", line 391, in set_section_option
+    self.file_config.set(section, name, value)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\configparser.py", line 1236, in set
+    super().set(section, option, value)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\configparser.py", line 923, in set
+    value = self._interpolation.before_set(self, section, option,
+                                           value)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\configparser.py", line 422, in before_set
+    raise ValueError("invalid interpolation syntax in %r at "
+                     "position %d" % (value, tmp_value.find('%')))
+ValueError: invalid interpolation syntax in 'postgresql+psycopg://postgres.hjkhtdxpfbstsgjavtpk:gastro123%40123@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require' at position 60
