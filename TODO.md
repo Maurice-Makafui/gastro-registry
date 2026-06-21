@@ -1,8 +1,6 @@
-# TODO - Facility list update
-
-- [x] Inspect where facility seed data is defined (backend/app/seed.py)
-- [x] Add new facility names to `DEMO_FACILITIES` with sensible defaults (type/region/city/email/phone/metadata)
-- [x] Ensure enum values for FacilityType match existing model
-- [ ] Run backend seed/startup or tests to verify facilities appear
-
+- [ ] Inspect FastAPI CORS initialization in backend/app/main.py
+- [ ] Apply CORS fix: ensure explicit allowed origins include Vercel frontend + localhost dev origins; keep credentials + wildcard methods/headers
+- [ ] Ensure middleware order: CORS added before routers
+- [ ] Verify OPTIONS preflight headers behavior via local test /debug/cors
+- [ ] Record files modified, final CORS configuration, and test result
 
