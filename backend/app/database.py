@@ -26,11 +26,12 @@ _is_pooled = (
 
 logger.info("Database host: %s (pooled=%s)", _parsed_url.hostname if _parsed_url else "unknown", _is_pooled)
 
-_connect_args = {"prepare_threshold": 0} if _is_pooled else {}
+_connect_args = {"prepare_threshold": None} if _is_pooled else {}
 
 engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
+    pool_recycle=300,
     connect_args=_connect_args,
     **({"poolclass": NullPool} if _is_pooled else {"pool_size": 10, "max_overflow": 20}),
 )
