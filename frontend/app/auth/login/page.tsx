@@ -114,23 +114,23 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo credentials */}
+          {/* Demo accounts — click to fill email */}
           <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
               Demo Accounts
             </p>
             <div className="space-y-2">
               {[
-                { role: "Admin", email: "admin@gastro.gh", pw: "admin123" },
-                { role: "Gastroenterologist", email: "doctor@gastro.gh", pw: "doctor123" },
-                { role: "Hepatologist", email: "hepato@gastro.gh", pw: "hepato123" },
-                { role: "Referring MD", email: "referrer@gastro.gh", pw: "referrer123" },
-                { role: "Nurse", email: "nurse@gastro.gh", pw: "nurse123" },
+                { role: "Admin",              email: "admin@gastro.gh"    },
+                { role: "Gastroenterologist", email: "doctor@gastro.gh"   },
+                { role: "Hepatologist",       email: "hepato@gastro.gh"   },
+                { role: "Referring MD",       email: "referrer@gastro.gh" },
+                { role: "Nurse",              email: "nurse@gastro.gh"    },
               ].map((cred) => (
                 <button
                   key={cred.role}
                   type="button"
-                  onClick={() => { setEmail(cred.email); setPassword(cred.pw); }}
+                  onClick={() => setEmail(cred.email)}
                   className="w-full text-left px-3 py-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 transition-all"
                 >
                   <span className="text-xs font-semibold text-brand-700">{cred.role}</span>

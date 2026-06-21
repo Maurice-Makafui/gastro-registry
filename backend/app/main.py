@@ -20,6 +20,7 @@ from app.routers import (
     liver_registry,
     mdt,
     members,
+    health,
 )
 from app.seed import seed_database
 from app.logging_config import setup_logging
@@ -85,6 +86,7 @@ app.include_router(procedures.router)
 app.include_router(liver_registry.router)
 app.include_router(mdt.router)
 app.include_router(members.router)
+app.include_router(health.router)
 
 
 @app.get("/health")
