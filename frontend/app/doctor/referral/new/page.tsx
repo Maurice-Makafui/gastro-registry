@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAuthenticated, getUser } from "@/lib/auth";
 import { referralsApi, patientsApi } from "@/lib/api";
@@ -10,7 +10,7 @@ import { ArrowLeft, Search } from "lucide-react";
 
 const URGENCY_OPTIONS = ["ROUTINE", "URGENT", "EMERGENCY"];
 
-export default function NewReferralPage() {
+function NewReferralForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prePatientId = searchParams.get("patient_id");
@@ -235,5 +235,13 @@ export default function NewReferralPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function NewReferralPage() {
+  return (
+    <Suspense>
+      <NewReferralForm />
+    </Suspense>
   );
 }
