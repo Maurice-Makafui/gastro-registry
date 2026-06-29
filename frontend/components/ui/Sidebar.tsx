@@ -21,6 +21,7 @@ import {
   Database,
   ShieldCheck,
   Globe,
+  Network,
 } from "lucide-react";
 import { getUser, clearAuth, isSpecialistRole, isSuperAdmin, isPlatformAdmin } from "@/lib/auth";
 import { User, UserRole } from "@/types";
@@ -45,26 +46,29 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
   exact?: boolean;
+  dividerBefore?: string;
 }
 
 const ALL_ITEMS: Record<string, NavItem[]> = {
   SUPER_ADMIN: [
-    { href: "/admin/super",           label: "Super Admin",      icon: ShieldCheck, exact: true },
-    { href: "/admin/platform",        label: "Platform",         icon: Globe },
-    { href: "/admin/users",          label: "Users",            icon: Users },
-    { href: "/surveillance/dashboard",label: "Surveillance",     icon: Activity },
-    { href: "/admin/dashboard",       label: "Analytics",        icon: BarChart3 },
-    { href: "/dashboard/facilities",  label: "Facilities",       icon: Building2 },
-    { href: "/directory",             label: "Directory",        icon: BookOpen },
-    { href: "/doctor/dashboard",      label: "Referrals",        icon: FileText },
+    { href: "/admin/super",            label: "Super Admin",      icon: ShieldCheck, exact: true },
+    { href: "/admin/platform",         label: "Platform",         icon: Globe },
+    { href: "/admin/users",            label: "Users",            icon: Users },
+    { href: "/surveillance/dashboard", label: "Surveillance",     icon: Activity },
+    { href: "/admin/dashboard",        label: "Analytics",        icon: BarChart3 },
+    { href: "/dashboard/facilities",   label: "Facilities",       icon: Building2 },
+    { href: "/directory",              label: "Directory",        icon: BookOpen },
+    { href: "/doctor/dashboard",       label: "Referrals",        icon: FileText },
+    { href: "/admin/registry",         label: "Network Registry", icon: Network, dividerBefore: "Registry" },
   ],
   PLATFORM_ADMIN: [
-    { href: "/admin/platform",        label: "Platform Admin",   icon: Globe, exact: true },
-    { href: "/admin/users",          label: "Users",            icon: Users },
-    { href: "/surveillance/dashboard",label: "Surveillance",     icon: Activity },
-    { href: "/admin/dashboard",       label: "Analytics",        icon: BarChart3 },
-    { href: "/dashboard/facilities",  label: "Facilities",       icon: Building2 },
-    { href: "/directory",             label: "Directory",        icon: BookOpen },
+    { href: "/admin/platform",         label: "Platform Admin",   icon: Globe, exact: true },
+    { href: "/admin/users",            label: "Users",            icon: Users },
+    { href: "/surveillance/dashboard", label: "Surveillance",     icon: Activity },
+    { href: "/admin/dashboard",        label: "Analytics",        icon: BarChart3 },
+    { href: "/dashboard/facilities",   label: "Facilities",       icon: Building2 },
+    { href: "/directory",              label: "Directory",        icon: BookOpen },
+    { href: "/admin/registry",         label: "Network Registry", icon: Network, dividerBefore: "Registry" },
   ],
   FACILITY_ADMIN: [
     { href: "/admin/dashboard",        label: "Dashboard",        icon: LayoutDashboard, exact: true },
@@ -74,6 +78,7 @@ const ALL_ITEMS: Record<string, NavItem[]> = {
     { href: "/directory",              label: "Directory",        icon: BookOpen },
     { href: "/dashboard/facilities",   label: "Facilities",       icon: Building2 },
     { href: "/analytics",              label: "Analytics",        icon: BarChart3 },
+    { href: "/admin/registry",         label: "Network Registry", icon: Network, dividerBefore: "Registry" },
   ],
   ADMIN: [
     { href: "/admin/dashboard",        label: "Dashboard",        icon: LayoutDashboard, exact: true },
@@ -86,6 +91,7 @@ const ALL_ITEMS: Record<string, NavItem[]> = {
     { href: "/dashboard/facilities",   label: "Facilities",       icon: Building2 },
     { href: "/analytics",              label: "Analytics",        icon: BarChart3 },
     { href: "/conferences",            label: "Conferences",      icon: CalendarDays },
+    { href: "/admin/registry",         label: "Network Registry", icon: Network, dividerBefore: "Registry" },
   ],
   NURSE: [
     { href: "/nurse/intake",           label: "New Intake",       icon: ClipboardPlus, exact: true },
@@ -240,12 +246,18 @@ export default function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
           {navItems.map((item) => (
-            <NavLink
-              key={item.href}
-              item={item}
-              pathname={pathname}
-              onClick={() => setMobileOpen(false)}
-            />
+            <div key={item.href}>
+              {item.dividerBefore && (
+                <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                  {item.dividerBefore}
+                </p>
+              )}
+              <NavLink
+                item={item}
+                pathname={pathname}
+                onClick={() => setMobileOpen(false)}
+              />
+            </div>
           ))}
         </nav>
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   User,
   Bell,
@@ -19,11 +20,16 @@ import {
   Clock,
   ChevronRight,
   CheckCircle2,
+  Network,
+  ArrowRight,
 } from "lucide-react";
+import { getUser } from "@/lib/auth";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type Tab = "profile" | "notifications" | "security";
+const ADMIN_ROLES = ["ADMIN", "SUPER_ADMIN", "PLATFORM_ADMIN", "FACILITY_ADMIN"];
+
+type Tab = "profile" | "notifications" | "security" | "admin";
 
 interface NotifRow {
   key: string;
@@ -546,9 +552,70 @@ function SecurityTab() {
   );
 }
 
+// ── Tab 4: Admin Tools (admin roles only) ────────────────────────────────────
+
+function AdminTab() {
+  const router = useRouter();
+  const shortcuts = [
+    {
+      href: "/admin/registry",
+      icon: Network,
+      title: "GASLID Network Registry",
+      description: "Onboard facilities and specialists, approve or suspend registry entries.",
+      color: "bg-brand-50 text-brand-600",
+    },
+    {
+      href: "/admin/users",
+      icon: User,
+      title: "User Management",
+      description: "Create, edit and deactivate system user accounts.",
+      color: "bg-purple-50 text-purple-600",
+    },
+    {
+      href: "/dashboard/facilities",
+      icon: Building2,
+      title: "Facility Directory",
+      description: "View and manage all registered facilities in the network.",
+      color: "bg-blue-50 text-blue-600",
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="card p-5">
+        <SectionHeader
+          title="Admin Tools"
+          subtitle="Quick links to administrative functions for your role."
+        />
+        <div className="space-y-3">
+          {shortcuts.map((s) => {
+            const Icon = s.icon;
+            return (
+              <button
+                key={s.href}
+                onClick={() => router.push(s.href)}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-brand-300 hover:bg-brand-50/40 transition-colors text-left"
+              >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${s.color}`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-slate-900">{s.title}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{s.description}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-const TABS: { id: Tab; label: string; icon: typeof User }[] = [
+const BASE_TABS: { id: Tab; label: string; icon: typeof User }[] = [
   { id: "profile",       label: "Profile & Workspace", icon: User        },
   { id: "notifications", label: "Notifications",        icon: Bell        },
   { id: "security",      label: "Security & Access",    icon: ShieldCheck },
@@ -556,11 +623,22 @@ const TABS: { id: Tab; label: string; icon: typeof User }[] = [
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const u = getUser();
+    setIsAdmin(ADMIN_ROLES.includes(u?.role ?? ""));
+  }, []);
+
+  const TABS = isAdmin
+    ? [...BASE_TABS, { id: "admin" as Tab, label: "Admin Tools", icon: ShieldCheck }]
+    : BASE_TABS;
 
   const CONTENT: Record<Tab, React.ReactNode> = {
     profile:       <ProfileTab />,
     notifications: <NotificationsTab />,
     security:      <SecurityTab />,
+    admin:         <AdminTab />,
   };
 
   return (
