@@ -33,7 +33,7 @@ class Facility(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True, index=True)
 
     users = relationship("User", back_populates="facility")
-    referrals = relationship("Referral", back_populates="facility")
+    referrals = relationship("Referral", foreign_keys="Referral.facility_id", back_populates="facility")
     specialists = relationship("Specialist", back_populates="institution")
     procedures = relationship("Procedure", back_populates="facility")
     liver_registry_entries = relationship("LiverRegistry", back_populates="facility")

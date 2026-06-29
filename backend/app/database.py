@@ -49,24 +49,41 @@ def get_db():
 
 
 def create_tables():
-    """Create all tables in the database (dev fallback; prefer Alembic migrations)."""
-    from app.models import (  # noqa: F401
-        user,
-        patient,
-        referral,
-        consultation,
-        followup,
-        facility,
-        audit_log,
-        specialist,
-        referral_timeline,
-        procedure,
-        liver_registry,
-        mdt,
-        patient_registry,
-        membership,
-    )
-    Base.metadata.create_all(bind=engine)
+    """Schema creation helper.
+
+    Alembic is the source of truth for migrations.
+
+    Previously we called Base.metadata.create_all(), which can auto-create
+    PostgreSQL ENUM types and tables before Alembic runs, causing failures like:
+    psycopg.errors.DuplicateObject: type "network_entity_type" already exists
+
+    To prevent this, schema auto-creation is disabled; Alembic runs in
+    `run_migrations()`.
+    """
+    # TEMP HOTFIX (2026-06-28): Commented out to prevent ANY model import side-effects
+    # (including possible PostgreSQL ENUM registration/type creation) during backend/migration
+    # startup. Alembic remains the source of truth for schema.
+    #
+    # Keep these imports commented so rollback is easy.
+    # from app.models import (  # noqa: F401
+    #     user,
+    #     patient,
+    #     referral,
+    #     consultation,
+    #     followup,
+    #     facility,
+    #     audit_log,
+    #     specialist,
+    #     referral_timeline,
+    #     procedure,
+    #     liver_registry,
+    #     mdt,
+    #     patient_registry,
+    #     membership,
+    # )
+    return
+
+
 
 
 def run_migrations():

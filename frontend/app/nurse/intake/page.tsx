@@ -6,6 +6,8 @@ import { patientsApi, referralsApi } from "@/lib/api";
 import toast from "react-hot-toast";
 import { User, SYMPTOMS_LIST } from "@/types";
 import { AlertCircle, User as UserIcon, Stethoscope, Activity } from "lucide-react";
+import SpecialistPicker from "@/components/referrals/SpecialistPicker";
+import { Specialist } from "@/types/specialist";
 
 const SYMPTOM_GROUPS = {
   "🔴 High Risk": SYMPTOMS_LIST.filter((s) => s.risk === "HIGH"),
@@ -45,6 +47,7 @@ export default function NurseIntakePage() {
   const [chiefComplaint, setChiefComplaint] = useState("");
   const [clinicalNotes, setClinicalNotes] = useState("");
   const [sourceFacility, setSourceFacility] = useState("");
+  const [receivingSpecialist, setReceivingSpecialist] = useState<Specialist | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) { router.replace("/auth/login"); return; }
@@ -103,6 +106,7 @@ export default function NurseIntakePage() {
         vitals: Object.keys(vitalsPayload).length > 0 ? vitalsPayload : undefined,
         chief_complaint: chiefComplaint || undefined,
         clinical_notes: clinicalNotes || undefined,
+        receiving_specialist_id: receivingSpecialist?.id ?? undefined,
       });
 
       const risk = res.data.risk_level;
@@ -274,6 +278,9 @@ export default function NurseIntakePage() {
                     value={sourceFacility}
                     onChange={(e) => setSourceFacility(e.target.value)}
                   />
+                </div>
+                <div className="sm:col-span-2">
+                  <SpecialistPicker value={receivingSpecialist} onChange={setReceivingSpecialist} />
                 </div>
               </div>
             </div>

@@ -8,31 +8,60 @@ SPECIALIST_ROLES = {
 
 CLINICAL_ROLES = SPECIALIST_ROLES | {UserRole.NURSE, UserRole.ADMIN}
 
+# Full permission set — reused by SUPER_ADMIN and ADMIN
+_FULL_PERMISSIONS = {
+    "facilities:read", "facilities:write", "facilities:delete",
+    "audit:read",
+    "patients:read", "patients:write",
+    "referrals:read", "referrals:write", "referrals:feedback",
+    "specialists:read", "specialists:write",
+    "procedures:read", "procedures:write",
+    "liver_registry:read", "liver_registry:write", "liver_registry:scan",
+    "analytics:read",
+    "mdt:read", "mdt:write", "mdt:conclude",
+    "registries:read",
+    "members:admin",
+    "surveillance:read",
+    "users:read", "users:write",
+}
+
 ROLE_PERMISSIONS: dict[UserRole, set[str]] = {
-    UserRole.ADMIN: {
+    UserRole.SUPER_ADMIN: _FULL_PERMISSIONS | {"system:config"},
+    UserRole.PLATFORM_ADMIN: {
+        # Operational admin across the platform (guarded server-side to exclude SUPER_ADMIN)
         "facilities:read",
-        "facilities:write",
-        "facilities:delete",
         "audit:read",
         "patients:read",
-        "patients:write",
+        "referrals:read",
+        "specialists:read",
+        "procedures:read",
+        "liver_registry:read",
+        "analytics:read",
+        "mdt:read",
+        "registries:read",
+        "surveillance:read",
+        "users:read",
+        "users:write",
+    },
+    UserRole.FACILITY_ADMIN: {
+        # Facility-scoped admin (enforced server-side via facility_id + role guard)
+        "facilities:read",
+        "audit:read",
         "referrals:read",
         "referrals:write",
-        "referrals:feedback",
         "specialists:read",
         "specialists:write",
         "procedures:read",
         "procedures:write",
         "liver_registry:read",
         "liver_registry:write",
-        "liver_registry:scan",
         "analytics:read",
         "mdt:read",
-        "mdt:write",
-        "mdt:conclude",
-        "registries:read",
-        "members:admin",
+        "users:read",
+        "users:write",
     },
+    UserRole.ADMIN: _FULL_PERMISSIONS,
+
     UserRole.DOCTOR: {
         "facilities:read",
         "patients:read",

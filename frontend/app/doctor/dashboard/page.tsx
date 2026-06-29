@@ -7,15 +7,18 @@ import RiskBadge from "@/components/ui/RiskBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { User, Referral } from "@/types";
 import { timeAgo } from "@/lib/utils";
-import { Search, Filter, RefreshCw, ChevronRight, AlertCircle, Clock, CheckCircle, Users } from "lucide-react";
+import { Search, Filter, RefreshCw, ChevronRight, AlertCircle, Clock, CheckCircle, Users, Inbox, Plus } from "lucide-react";
 
-type FilterStatus = "ALL" | "PENDING" | "UNDER_REVIEW" | "SCHEDULED" | "COMPLETED";
+type Tab = "ALL" | "INCOMING" | "ACCEPTED" | "DECLINED";
+type FilterStatus = "ALL" | "PENDING" | "SUBMITTED" | "ASSIGNED" | "ACCEPTED" | "DECLINED" | "REFERRED_ON" | "COMPLETED";
 type FilterRisk = "ALL" | "HIGH" | "MEDIUM" | "LOW";
 
 export default function DoctorDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [incomingReferrals, setIncomingReferrals] = useState<Referral[]>([]);
+  const [tab, setTab] = useState<Tab>("ALL");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("ALL");
@@ -27,8 +30,12 @@ export default function DoctorDashboard() {
       const params: Record<string, string> = {};
       if (statusFilter !== "ALL") params.status = statusFilter;
       if (riskFilter !== "ALL") params.risk_level = riskFilter;
-      const res = await referralsApi.list(params);
-      setReferrals(res.data);
+      const [allRes, incomingRes] = await Promise.all([
+        referralsApi.list(params),
+        referralsApi.incoming(params).catch(() => ({ data: [] })),
+      ]);
+      setReferrals(allRes.data);
+      setIncomingReferrals(incomingRes.data);
     } finally {
       setLoading(false);
     }
@@ -45,7 +52,13 @@ export default function DoctorDashboard() {
     if (user) fetchReferrals();
   }, [user, fetchReferrals]);
 
-  const filtered = referrals.filter((r) =>
+  const activeList =
+    tab === "INCOMING" ? incomingReferrals
+    : tab === "ACCEPTED" ? incomingReferrals.filter((r) => r.status === "ACCEPTED")
+    : tab === "DECLINED" ? incomingReferrals.filter((r) => r.status === "DECLINED")
+    : referrals;
+
+  const filtered = activeList.filter((r) =>
     !search ||
     r.patient?.full_name.toLowerCase().includes(search.toLowerCase()) ||
     String(r.id).includes(search)
@@ -53,10 +66,12 @@ export default function DoctorDashboard() {
 
   const stats = {
     total: referrals.length,
-    pending: referrals.filter((r) => r.status === "PENDING").length,
+    pending: referrals.filter((r) => ["PENDING", "SUBMITTED", "ASSIGNED"].includes(r.status)).length,
     high: referrals.filter((r) => r.risk_level === "HIGH").length,
     completed: referrals.filter((r) => r.status === "COMPLETED").length,
   };
+
+  const incomingCount = incomingReferrals.filter((r) => ["PENDING", "SUBMITTED", "ASSIGNED", "REFERRED_ON"].includes(r.status)).length;
 
   if (!user) return null;
 
@@ -64,15 +79,47 @@ export default function DoctorDashboard() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Referrals Dashboard</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Referrals</h1>
           <p className="text-slate-500 text-sm">
             {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
-        <button onClick={fetchReferrals} className="btn-secondary flex items-center gap-2">
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          <span className="hidden sm:block">Refresh</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => router.push("/doctor/referral/new")} className="btn-primary flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:block">New Referral</span>
+          </button>
+          <button onClick={fetchReferrals} className="btn-secondary flex items-center gap-2">
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:block">Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit flex-wrap">
+        {([
+          { key: "ALL", label: "All" },
+          { key: "INCOMING", label: "Incoming", icon: true },
+          { key: "ACCEPTED", label: "Accepted" },
+          { key: "DECLINED", label: "Declined" },
+        ] as { key: Tab; label: string; icon?: boolean }[]).map(({ key, label, icon }) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              tab === key ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {icon && <Inbox className="w-3.5 h-3.5" />}
+            {label}
+            {icon && incomingCount > 0 && (
+              <span className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                {incomingCount}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Stats */}
@@ -119,8 +166,11 @@ export default function DoctorDashboard() {
               >
                 <option value="ALL">All Status</option>
                 <option value="PENDING">Pending</option>
-                <option value="UNDER_REVIEW">Under Review</option>
-                <option value="SCHEDULED">Scheduled</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="ASSIGNED">Assigned</option>
+                <option value="ACCEPTED">Accepted</option>
+                <option value="DECLINED">Declined</option>
+                <option value="REFERRED_ON">Referred On</option>
                 <option value="COMPLETED">Completed</option>
               </select>
             </div>

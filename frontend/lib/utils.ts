@@ -21,18 +21,27 @@ export function getRiskBadgeClass(risk: RiskLevel): string {
 
 export function getStatusBadgeClass(status: ReferralStatus): string {
   switch (status) {
+    case "DRAFT":
+      return "bg-slate-100 text-slate-600 border border-slate-200";
     case "PENDING":
+    case "SUBMITTED":
       return "bg-yellow-100 text-yellow-800 border border-yellow-200";
+    case "ASSIGNED":
     case "UNDER_REVIEW":
       return "bg-blue-100 text-blue-800 border border-blue-200";
+    case "ACCEPTED":
+      return "bg-teal-100 text-teal-800 border border-teal-200";
     case "SCHEDULED":
       return "bg-indigo-100 text-indigo-800 border border-indigo-200";
+    case "DECLINED":
+      return "bg-red-100 text-red-700 border border-red-200";
+    case "REFERRED_ON":
+    case "REFERRED_OUT":
+      return "bg-purple-100 text-purple-800 border border-purple-200";
     case "COMPLETED":
       return "bg-green-100 text-green-800 border border-green-200";
     case "CANCELLED":
       return "bg-gray-100 text-gray-600 border border-gray-200";
-    case "REFERRED_OUT":
-      return "bg-purple-100 text-purple-800 border border-purple-200";
     default:
       return "bg-gray-100 text-gray-700";
   }

@@ -21,7 +21,12 @@ from app.routers import (
     mdt,
     members,
     health,
+    surveillance,
+    
+    # Admin users
+    admin_users,
 )
+
 from app.seed import seed_database
 from app.logging_config import setup_logging
 from app.middleware.audit_middleware import AuditMiddleware
@@ -65,7 +70,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    # Explicitly allow known frontend origins.
+    # NOTE: Do NOT use allow_origins=["*"] together with allow_credentials=True.
+    allow_origins=[
+        "https://gastro-registry.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -87,8 +98,11 @@ app.include_router(liver_registry.router)
 app.include_router(mdt.router)
 app.include_router(members.router)
 app.include_router(health.router)
+app.include_router(admin_users.router)
+app.include_router(surveillance.router)
 
 
+#to check the status of the backend
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "service": "Gastro Referral API", "version": "2.1.0"}
@@ -97,3 +111,10 @@ def health_check():
 @app.get("/debug/cors")
 def debug_cors():
     return {"cors_origins": settings.cors_origins_list, "frontend_url": settings.FRONTEND_URL}
+
+@app.get("/")
+def root():
+    return {
+        "status": "ok",
+        "message": "Hey Maurice,Your Gastro Registry API is running well congrats"
+    }

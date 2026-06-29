@@ -8,11 +8,15 @@ from app.database import Base
 class UserRole(str, enum.Enum):
     NURSE = "NURSE"
     DOCTOR = "DOCTOR"
-    ADMIN = "ADMIN"
+    ADMIN = "ADMIN"  # legacy/general admin role; keep for backward compatibility
     GASTROENTEROLOGIST = "GASTROENTEROLOGIST"
     HEPATOLOGIST = "HEPATOLOGIST"
     REFERRING_PHYSICIAN = "REFERRING_PHYSICIAN"
     RESEARCHER = "RESEARCHER"
+    SUPER_ADMIN = "SUPER_ADMIN"
+    PLATFORM_ADMIN = "PLATFORM_ADMIN"
+    FACILITY_ADMIN = "FACILITY_ADMIN"
+
 
 
 class User(Base):

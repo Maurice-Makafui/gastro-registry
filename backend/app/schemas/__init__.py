@@ -27,6 +27,7 @@ class UserCreate(BaseModel):
     role: UserRole = UserRole.NURSE
     department: Optional[str] = None
     phone: Optional[str] = None
+    facility_id: Optional[int] = None
 
 
 class UserOut(BaseModel):
@@ -113,16 +114,62 @@ class ReferralCreate(BaseModel):
     source_facility: Optional[str] = None
     facility_id: Optional[int] = None
     referring_physician_id: Optional[int] = None
+    receiving_specialist_id: Optional[int] = None
+    receiving_facility_id: Optional[int] = None
+    referral_reason: Optional[str] = None
     symptoms: List[str]
     vitals: Optional[VitalsSchema] = None
     chief_complaint: Optional[str] = None
     clinical_notes: Optional[str] = None
 
 
+class ReferralRoute(BaseModel):
+    receiving_specialist_id: Optional[int] = None
+    receiving_facility_id: Optional[int] = None
+    referral_reason: Optional[str] = None
+
+
 class ReferralUpdate(BaseModel):
     status: Optional[ReferralStatus] = None
     assigned_doctor_id: Optional[int] = None
     clinical_notes: Optional[str] = None
+
+
+class ReferralAccept(BaseModel):
+    note: Optional[str] = None
+
+
+class ReferralDecline(BaseModel):
+    decline_reason: str
+
+
+class ReferralReferOn(BaseModel):
+    receiving_specialist_id: Optional[int] = None
+    receiving_facility_id: Optional[int] = None
+    referral_reason: Optional[str] = None
+
+
+class ReceivingSpecialistOut(BaseModel):
+    id: int
+    user_id: int
+    specialty: str
+    subspecialties: List[str] = []
+    institution_id: int
+    user: Optional[UserOut] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ReceivingFacilityOut(BaseModel):
+    id: int
+    facility_name: str
+    city: str
+    region: str
+    facility_type: str
+
+    class Config:
+        from_attributes = True
 
 
 class ReferralOut(BaseModel):
@@ -132,6 +179,10 @@ class ReferralOut(BaseModel):
     referring_physician_id: Optional[int] = None
     source_facility: Optional[str] = None
     facility_id: Optional[int] = None
+    receiving_specialist_id: Optional[int] = None
+    receiving_facility_id: Optional[int] = None
+    referred_on_from_referral_id: Optional[int] = None
+    referral_reason: Optional[str] = None
     symptoms: List[str]
     vitals: Optional[Any] = None
     chief_complaint: Optional[str] = None
@@ -141,7 +192,9 @@ class ReferralOut(BaseModel):
     feedback_status: FeedbackStatus = FeedbackStatus.PENDING
     urgency: Optional[str] = None
     assigned_doctor_id: Optional[int] = None
+    decline_reason: Optional[str] = None
     accepted_at: Optional[datetime] = None
+    declined_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     outcome_summary: Optional[str] = None
     recommendation_text: Optional[str] = None
@@ -149,6 +202,8 @@ class ReferralOut(BaseModel):
     patient: Optional[PatientOut] = None
     assigned_doctor: Optional[UserOut] = None
     referring_physician: Optional[UserOut] = None
+    receiving_specialist: Optional[ReceivingSpecialistOut] = None
+    receiving_facility: Optional[ReceivingFacilityOut] = None
 
     class Config:
         from_attributes = True

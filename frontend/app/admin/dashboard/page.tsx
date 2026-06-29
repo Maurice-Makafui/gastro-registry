@@ -48,11 +48,18 @@ export default function AdminDashboard() {
     );
   }
 
-  const s = summary!;
-  const riskChartData = Object.entries(s.referrals_by_risk).map(([name, value]) => ({ name, value }));
-  const statusChartData = Object.entries(s.referrals_by_status)
-    .filter(([, v]) => v > 0)
-    .map(([name, value]) => ({ name: name.replace("_", " "), value }));
+  const s = summary ?? ({} as AnalyticsSummary);
+
+  const riskChartData = Object.entries((s as any).referrals_by_risk ?? {}).map(([name, value]) => ({
+    name,
+    value: value as number,
+  }));
+
+  const statusChartData = Object.entries((s as any).referrals_by_status ?? {})
+    .filter(([, v]) => (v as number) > 0)
+    .map(([name, value]) => ({ name: name.replace("_", " "), value: value as number }));
+
+  const recentReferrals = (s as any).recent_referrals ?? [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -157,7 +164,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {s.recent_referrals.map((r) => (
+                {(recentReferrals as any[]).map((r) => (
                   <tr
                     key={r.id}
                     className="hover:bg-slate-50 cursor-pointer"

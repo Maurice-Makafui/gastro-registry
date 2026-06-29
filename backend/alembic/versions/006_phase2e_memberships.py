@@ -19,15 +19,19 @@ def upgrade() -> None:
     conn = op.get_bind()
     inspector = sa.inspect(conn)
 
-    op.execute(
-        """
-        DO $$ BEGIN
-            CREATE TYPE membership_status AS ENUM ('ACTIVE', 'PENDING', 'EXPIRED');
-        EXCEPTION
-            WHEN duplicate_object THEN NULL;
-        END $$;
-        """
-    )
+    # TEMP HOTFIX (2026-06-28): Disable explicit ENUM type creation to prevent
+    # psycopg.errors.DuplicateObject crashes during migration startup.
+    #
+    # op.execute(
+    #     """
+    #     DO $$ BEGIN
+    #         CREATE TYPE membership_status AS ENUM ('ACTIVE', 'PENDING', 'EXPIRED');
+    #     EXCEPTION
+    #         WHEN duplicate_object THEN NULL;
+    #     END $$;
+    #     """
+    # )
+
 
     if not inspector.has_table("memberships"):
         op.create_table(

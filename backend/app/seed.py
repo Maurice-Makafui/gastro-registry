@@ -11,9 +11,18 @@ from app.models.specialist import Specialist, Specialty
 from app.models.patient import Patient
 from app.models.procedure import Procedure, ProcedureType
 from app.models.liver_registry import LiverRegistry, LiverDiagnosis, LiverRiskFlag
+from app.models.network_registry import (
+    NetworkRegistry,
+    NetworkEntityType,
+    VerificationStatus,
+    RegistryStatus,
+    MembershipStatus,
+    ApprovalStatus,
+)
 from app.core.security import get_password_hash
 from app.core.permissions import SPECIALIST_ROLES
 from datetime import date, timedelta
+
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +109,22 @@ DEMO_USERS = [
         "password_env": "SEED_ADMIN_PASSWORD",
         "role": UserRole.ADMIN,
         "department": "Administration",
+        "facility_index": 0,
+    },
+    {
+        "name": "Super Admin",
+        "email": "superadmin@gastro.gh",
+        "password_env": "SEED_SUPER_ADMIN_PASSWORD",
+        "role": UserRole.SUPER_ADMIN,
+        "department": "Platform Governance",
+        "facility_index": 0,
+    },
+    {
+        "name": "Platform Admin",
+        "email": "platformadmin@gastro.gh",
+        "password_env": "SEED_PLATFORM_ADMIN_PASSWORD",
+        "role": UserRole.PLATFORM_ADMIN,
+        "department": "GASLID Operations",
         "facility_index": 0,
     },
     {
@@ -313,6 +338,64 @@ def _seed_clinical_demo_data(db: Session) -> None:
     logger.info("Demo procedures and liver registry records seeded")
 
 
+def _seed_network_registry_memberships(db: Session) -> None:
+    """Backfill network_registry from legacy Specialist/Falility flags.
+
+    Backward compatibility: until a dedicated UI imports GASLID Network Registry,
+    we seed from:
+      - Specialist.is_public -> VERIFIED + ACTIVE + APPROVED_BY_GASLID
+      - Facility.is_active -> ACTIVE + VERIFIED + APPROVED_BY_GASLID
+    """
+
+    # If network_registry already has rows, do not duplicate (idempotent).
+    if db.query(NetworkRegistry).first():
+        return
+
+    today = date.today()
+    expiry = today.replace(year=today.year + 1)
+
+    # Specialists
+    for spec in db.query(Specialist).filter(Specialist.deleted_at.is_(None), Specialist.is_public.is_(True)).all():
+        facility = spec.institution
+        db.add(
+            NetworkRegistry(
+                registry_number=f"SPEC-{spec.id}",
+                entity_type=NetworkEntityType.SPECIALIST,
+                specialist_id=spec.id,
+                facility_id=facility.id if facility else None,
+                verification_status=VerificationStatus.VERIFIED,
+                registry_status=RegistryStatus.ACTIVE,
+                membership_status=MembershipStatus.ACTIVE,
+                approval_status=ApprovalStatus.APPROVED_BY_GASLID,
+                approved_at=None,
+                expiry_date=expiry,
+                region=facility.region if facility else None,
+                district=facility.city if facility else None,
+            )
+        )
+
+    # Facilities
+    for facility in db.query(Facility).filter(Facility.deleted_at.is_(None), Facility.is_active.is_(True)).all():
+        db.add(
+            NetworkRegistry(
+                registry_number=f"FAC-{facility.id}",
+                entity_type=NetworkEntityType.FACILITY,
+                facility_id=facility.id,
+                verification_status=VerificationStatus.VERIFIED,
+                registry_status=RegistryStatus.ACTIVE,
+                membership_status=MembershipStatus.ACTIVE,
+                approval_status=ApprovalStatus.APPROVED_BY_GASLID,
+                approved_at=None,
+                expiry_date=expiry,
+                region=facility.region,
+                district=facility.city,
+            )
+        )
+
+    db.commit()
+    logger.info("NetworkRegistry backfill completed")
+
+
 def seed_database():
     db: Session = SessionLocal()
     try:
@@ -321,9 +404,11 @@ def seed_database():
         if db.query(User).first():
             _seed_specialists_for_users(db)
             _seed_clinical_demo_data(db)
+            _seed_network_registry_memberships(db)
             return
 
         logger.info("Seeding database with demo facilities and users...")
+
 
         if not facilities:
             facilities = db.query(Facility).all()

@@ -124,7 +124,93 @@ def send_referral_notification(self, referral_id: int, doctor_id: int) -> dict:
 @celery_app.task(
     bind=True,
     base=_BaseTask,
-    name="app.services.notifications.send_mdt_alert",
+    name="app.services.notifications.send_facility_referral_notification",
+    max_retries=3,
+    default_retry_delay=60,
+)
+def send_facility_referral_notification(self, referral_id: int, facility_id: int) -> dict:
+    """Notify a facility contact about an incoming referral."""
+    db = _get_db()
+    try:
+        from app.models.referral import Referral
+        from app.models.facility import Facility
+
+        referral = db.query(Referral).filter(Referral.id == referral_id).first()
+        facility = db.query(Facility).filter(Facility.id == facility_id).first()
+        if not referral or not facility:
+            return {"status": "skipped", "reason": "record_not_found"}
+
+        if not facility.email:
+            logger.warning("send_facility_referral_notification: facility %s missing email", facility_id)
+            return {"status": "skipped", "reason": "no_contact_email"}
+
+        subject = f"[GastroRef] Incoming Referral #{referral_id}"
+        body = (
+            f"Facility: {facility.facility_name}\n"
+            f"Referral ID: {referral_id}\n"
+            f"Risk Level: {referral.risk_level.value}\n"
+            f"Reason: {referral.referral_reason or 'N/A'}\n\n"
+            f"Review in portal: http://localhost:3000/dashboard/facilities/{facility_id}\n"
+        )
+
+        _send_email(facility.email, subject, body)
+        logger.info("Facility referral notification sent: referral=%s facility=%s", referral_id, facility_id)
+        return {"status": "sent", "referral_id": referral_id, "facility_id": facility_id}
+    except Exception as exc:
+        logger.error("send_facility_referral_notification error: %s", exc)
+        raise self.retry(exc=exc)
+    finally:
+        db.close()
+
+
+@celery_app.task(
+    bind=True,
+    base=_BaseTask,
+    name="app.services.notifications.send_specialist_referral_notification",
+    max_retries=3,
+    default_retry_delay=60,
+)
+def send_specialist_referral_notification(self, referral_id: int, specialist_id: int) -> dict:
+    """Notify a specialist that a referral has been sent directly to them."""
+    db = _get_db()
+    try:
+        from app.models.referral import Referral
+        from app.models.specialist import Specialist
+        from app.models.user import User
+
+        referral = db.query(Referral).filter(Referral.id == referral_id).first()
+        specialist = db.query(Specialist).filter(Specialist.id == specialist_id).first()
+        if not referral or not specialist:
+            return {"status": "skipped", "reason": "record_not_found"}
+
+        doctor = db.query(User).filter(User.id == specialist.user_id).first()
+        if not doctor:
+            return {"status": "skipped", "reason": "specialist_user_not_found"}
+
+        subject = f"[GastroRef] Incoming Referral #{referral_id} – {referral.risk_level.value} Risk"
+        body = (
+            f"Dear Dr. {doctor.name},\n\n"
+            f"A referral (ID #{referral_id}) has been sent directly to you.\n"
+            f"Risk Level     : {referral.risk_level.value}\n"
+            f"Chief Complaint: {referral.chief_complaint or 'N/A'}\n"
+            f"Urgency        : {referral.urgency or 'N/A'}\n\n"
+            f"Review it here: http://localhost:3000/doctor/referral/{referral_id}\n\n"
+            "GastroRef Ghana"
+        )
+        _send_email(doctor.email, subject, body)
+        if doctor.phone:
+            _send_whatsapp(doctor.phone, f"Incoming referral #{referral_id} ({referral.risk_level.value} risk) sent to you on GastroRef.")
+
+        logger.info("Specialist referral notification sent: referral=%s specialist=%s", referral_id, specialist_id)
+        return {"status": "sent", "referral_id": referral_id, "specialist_id": specialist_id}
+    except Exception as exc:
+        logger.error("send_specialist_referral_notification error: %s", exc)
+        raise self.retry(exc=exc)
+    finally:
+        db.close()
+
+
+@celery_app.task(
     max_retries=3,
     default_retry_delay=60,
 )

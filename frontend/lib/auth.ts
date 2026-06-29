@@ -40,6 +40,10 @@ export function getRoleHome(role: string): string {
       return "/nurse/intake";
     case "ADMIN":
       return "/admin/dashboard";
+    case "SUPER_ADMIN":
+      return "/admin/super";
+    case "PLATFORM_ADMIN":
+      return "/admin/platform";
     case "REFERRING_PHYSICIAN":
       return "/doctor/dashboard";
     case "RESEARCHER":
@@ -47,6 +51,14 @@ export function getRoleHome(role: string): string {
     default:
       return "/auth/login";
   }
+}
+
+export function isSuperAdmin(role: string): boolean {
+  return role === "SUPER_ADMIN";
+}
+
+export function isPlatformAdmin(role: string): boolean {
+  return role === "PLATFORM_ADMIN" || role === "SUPER_ADMIN";
 }
 
 export function isClinicalRole(role: string): boolean {

@@ -20,27 +20,32 @@ def upgrade() -> None:
     conn = op.get_bind()
     inspector = sa.inspect(conn)
 
-    op.execute(
-        """
-        DO $$ BEGIN
-            CREATE TYPE mdt_status AS ENUM ('OPEN', 'CONCLUDED');
-        EXCEPTION
-            WHEN duplicate_object THEN NULL;
-        END $$;
-        """
-    )
-    op.execute(
-        """
-        DO $$ BEGIN
-            CREATE TYPE registry_type AS ENUM (
-                'HEPATITIS_B', 'LIVER_CIRRHOSIS', 'ENDOSCOPY',
-                'UPPER_GI_BLEEDING', 'COLORECTAL_CANCER'
-            );
-        EXCEPTION
-            WHEN duplicate_object THEN NULL;
-        END $$;
-        """
-    )
+    # TEMP HOTFIX (2026-06-28): Disable explicit ENUM type creation to prevent
+    # psycopg.errors.DuplicateObject crashes during migration startup.
+    # Alembic table creation may still reference these types.
+    #
+    # op.execute(
+    #     """
+    #     DO $$ BEGIN
+    #         CREATE TYPE mdt_status AS ENUM ('OPEN', 'CONCLUDED');
+    #     EXCEPTION
+    #         WHEN duplicate_object THEN NULL;
+    #     END $$;
+    #     """
+    # )
+    # op.execute(
+    #     """
+    #     DO $$ BEGIN
+    #         CREATE TYPE registry_type AS ENUM (
+    #             'HEPATITIS_B', 'LIVER_CIRRHOSIS', 'ENDOSCOPY',
+    #             'UPPER_GI_BLEEDING', 'COLORECTAL_CANCER'
+    #         );
+    #     EXCEPTION
+    #         WHEN duplicate_object THEN NULL;
+    #     END $$;
+    #     """
+    # )
+
 
     if not inspector.has_table("mdt_cases"):
         op.create_table(

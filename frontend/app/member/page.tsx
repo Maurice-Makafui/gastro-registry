@@ -6,7 +6,6 @@ import {
   BookOpen, Download, Plus, TrendingUp,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import Navbar from "@/components/ui/Navbar";
 import { getUser } from "@/lib/auth";
 import { getMyMembership, addCPDPoints, getGuidelines } from "@/lib/api/members";
 import type { Membership, Guideline } from "@/types/analytics";
@@ -69,11 +68,8 @@ export default function MemberPortalPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <Navbar user={user} />
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -84,10 +80,7 @@ export default function MemberPortalPage() {
   const StatusIcon = statusCfg.icon;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar user={user} />
-
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
         {/* Page header */}
         <div className="flex items-center gap-3 mb-2">
@@ -230,7 +223,6 @@ export default function MemberPortalPage() {
           </div>
         </div>
 
-      </main>
     </div>
   );
 }

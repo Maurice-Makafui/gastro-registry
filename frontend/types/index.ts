@@ -5,7 +5,10 @@ export type UserRole =
   | "GASTROENTEROLOGIST"
   | "HEPATOLOGIST"
   | "REFERRING_PHYSICIAN"
-  | "RESEARCHER";
+  | "RESEARCHER"
+  | "SUPER_ADMIN"
+  | "PLATFORM_ADMIN"
+  | "FACILITY_ADMIN";
 
 export interface User {
   id: number;
@@ -42,12 +45,18 @@ export interface Patient {
 
 export type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
 export type ReferralStatus =
+  | "DRAFT"
   | "PENDING"
+  | "SUBMITTED"
   | "UNDER_REVIEW"
+  | "ASSIGNED"
+  | "ACCEPTED"
   | "SCHEDULED"
+  | "DECLINED"
+  | "REFERRED_ON"
+  | "REFERRED_OUT"
   | "COMPLETED"
-  | "CANCELLED"
-  | "REFERRED_OUT";
+  | "CANCELLED";
 
 export type FeedbackStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "COMPLETED";
 
@@ -62,6 +71,23 @@ export interface Vitals {
   respiratory_rate?: number;
 }
 
+export interface ReceivingSpecialist {
+  id: number;
+  user_id: number;
+  specialty: string;
+  subspecialties: string[];
+  institution_id: number;
+  user?: { id: number; name: string; email: string; role: string };
+}
+
+export interface ReceivingFacility {
+  id: number;
+  facility_name: string;
+  city: string;
+  region: string;
+  facility_type: string;
+}
+
 export interface Referral {
   id: number;
   patient_id: number;
@@ -69,16 +95,22 @@ export interface Referral {
   referring_physician_id?: number;
   source_facility?: string;
   facility_id?: number;
+  receiving_specialist_id?: number;
+  receiving_facility_id?: number;
+  referred_on_from_referral_id?: number;
   symptoms: string[];
   vitals?: Vitals;
   chief_complaint?: string;
   clinical_notes?: string;
+  referral_reason?: string;
   risk_level: RiskLevel;
   status: ReferralStatus;
   feedback_status?: FeedbackStatus;
   urgency?: string;
   assigned_doctor_id?: number;
+  decline_reason?: string;
   accepted_at?: string;
+  declined_at?: string;
   completed_at?: string;
   outcome_summary?: string;
   recommendation_text?: string;
@@ -86,6 +118,8 @@ export interface Referral {
   patient?: Patient;
   assigned_doctor?: User;
   referring_physician?: User;
+  receiving_specialist?: ReceivingSpecialist;
+  receiving_facility?: ReceivingFacility;
 }
 
 export interface Consultation {

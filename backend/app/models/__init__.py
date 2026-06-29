@@ -12,6 +12,14 @@ from app.models.liver_registry import LiverRegistry, LiverDiagnosis, LiverRiskFl
 from app.models.mdt import MDTCase, MDTComment, MDTStatus
 from app.models.patient_registry import PatientRegistry, RegistryType
 from app.models.membership import Membership, MembershipStatus
+from app.models.network_registry import (
+    NetworkRegistry,
+    NetworkEntityType,
+    VerificationStatus,
+    RegistryStatus,
+    MembershipStatus as NetworkMembershipStatus,
+    ApprovalStatus,
+)
 
 __all__ = [
     "User", "UserRole",
@@ -28,4 +36,11 @@ __all__ = [
     "MDTCase", "MDTComment", "MDTStatus",
     "PatientRegistry", "RegistryType",
     "Membership", "MembershipStatus",
+    "NetworkRegistry",
+    "NetworkEntityType",
+    "VerificationStatus",
+    "RegistryStatus",
+    "NetworkMembershipStatus",
+    "ApprovalStatus",
 ]
+

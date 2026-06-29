@@ -6,12 +6,18 @@ interface StatusBadgeProps {
 }
 
 const labels: Record<ReferralStatus, string> = {
+  DRAFT: "Draft",
   PENDING: "Pending",
+  SUBMITTED: "Submitted",
   UNDER_REVIEW: "Under Review",
+  ASSIGNED: "Assigned",
+  ACCEPTED: "Accepted",
   SCHEDULED: "Scheduled",
+  DECLINED: "Declined",
+  REFERRED_ON: "Referred On",
+  REFERRED_OUT: "Referred Out",
   COMPLETED: "Completed",
   CANCELLED: "Cancelled",
-  REFERRED_OUT: "Referred Out",
 };
 
 export default function StatusBadge({ status }: StatusBadgeProps) {

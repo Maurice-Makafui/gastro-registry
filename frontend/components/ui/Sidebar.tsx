@@ -19,8 +19,10 @@ import {
   X,
   ChevronRight,
   Database,
+  ShieldCheck,
+  Globe,
 } from "lucide-react";
-import { getUser, clearAuth, isSpecialistRole } from "@/lib/auth";
+import { getUser, clearAuth, isSpecialistRole, isSuperAdmin, isPlatformAdmin } from "@/lib/auth";
 import { User, UserRole } from "@/types";
 import NotificationsDropdown from "./NotificationsDropdown";
 
@@ -31,6 +33,8 @@ const ROLE_COLORS: Record<string, string> = {
   GASTROENTEROLOGIST: "bg-emerald-500/20 text-emerald-300",
   HEPATOLOGIST: "bg-teal-500/20 text-teal-300",
   ADMIN: "bg-purple-500/20 text-purple-300",
+  SUPER_ADMIN: "bg-red-500/20 text-red-300",
+  PLATFORM_ADMIN: "bg-orange-500/20 text-orange-300",
   REFERRING_PHYSICIAN: "bg-orange-500/20 text-orange-300",
   RESEARCHER: "bg-slate-500/20 text-slate-300",
 };
@@ -44,6 +48,33 @@ interface NavItem {
 }
 
 const ALL_ITEMS: Record<string, NavItem[]> = {
+  SUPER_ADMIN: [
+    { href: "/admin/super",           label: "Super Admin",      icon: ShieldCheck, exact: true },
+    { href: "/admin/platform",        label: "Platform",         icon: Globe },
+    { href: "/admin/users",          label: "Users",            icon: Users },
+    { href: "/surveillance/dashboard",label: "Surveillance",     icon: Activity },
+    { href: "/admin/dashboard",       label: "Analytics",        icon: BarChart3 },
+    { href: "/dashboard/facilities",  label: "Facilities",       icon: Building2 },
+    { href: "/directory",             label: "Directory",        icon: BookOpen },
+    { href: "/doctor/dashboard",      label: "Referrals",        icon: FileText },
+  ],
+  PLATFORM_ADMIN: [
+    { href: "/admin/platform",        label: "Platform Admin",   icon: Globe, exact: true },
+    { href: "/admin/users",          label: "Users",            icon: Users },
+    { href: "/surveillance/dashboard",label: "Surveillance",     icon: Activity },
+    { href: "/admin/dashboard",       label: "Analytics",        icon: BarChart3 },
+    { href: "/dashboard/facilities",  label: "Facilities",       icon: Building2 },
+    { href: "/directory",             label: "Directory",        icon: BookOpen },
+  ],
+  FACILITY_ADMIN: [
+    { href: "/admin/dashboard",        label: "Dashboard",        icon: LayoutDashboard, exact: true },
+    { href: "/admin/users",            label: "Users",            icon: Users },
+    { href: "/doctor/dashboard",       label: "Referrals",        icon: FileText },
+    { href: "/doctor/referral/new",    label: "New Referral",     icon: ClipboardPlus },
+    { href: "/directory",              label: "Directory",        icon: BookOpen },
+    { href: "/dashboard/facilities",   label: "Facilities",       icon: Building2 },
+    { href: "/analytics",              label: "Analytics",        icon: BarChart3 },
+  ],
   ADMIN: [
     { href: "/admin/dashboard",        label: "Dashboard",        icon: LayoutDashboard, exact: true },
     { href: "/doctor/dashboard",       label: "Referrals",        icon: FileText },
@@ -80,6 +111,7 @@ const ALL_ITEMS: Record<string, NavItem[]> = {
 
 const GASTRO_ITEMS: NavItem[] = [
   { href: "/doctor/dashboard",       label: "Dashboard",        icon: LayoutDashboard, exact: true },
+  { href: "/doctor/referral/new",    label: "New Referral",     icon: ClipboardPlus },
   { href: "/doctor/procedures/new",  label: "Procedures",       icon: Stethoscope },
   { href: "/registries",             label: "Registries",       icon: Database },
   { href: "/mdt",                    label: "MDT Board",        icon: Users },
@@ -92,6 +124,7 @@ const GASTRO_ITEMS: NavItem[] = [
 
 const HEPATO_ITEMS: NavItem[] = [
   { href: "/doctor/dashboard",       label: "Dashboard",        icon: LayoutDashboard, exact: true },
+  { href: "/doctor/referral/new",    label: "New Referral",     icon: ClipboardPlus },
   { href: "/registries",             label: "Registries",       icon: Database },
   { href: "/doctor/procedures/new",  label: "Procedures",       icon: Stethoscope },
   { href: "/mdt",                    label: "MDT Board",        icon: Users },
@@ -106,6 +139,9 @@ function getNavItems(role: string): NavItem[] {
   if (role === "HEPATOLOGIST") return HEPATO_ITEMS;
   if (role === "GASTROENTEROLOGIST" || role === "DOCTOR") return GASTRO_ITEMS;
   if (isSpecialistRole(role)) return GASTRO_ITEMS;
+  if (isSuperAdmin(role)) return ALL_ITEMS["SUPER_ADMIN"] ?? [];
+  if (isPlatformAdmin(role)) return ALL_ITEMS["PLATFORM_ADMIN"] ?? [];
+  if (role === "FACILITY_ADMIN") return ALL_ITEMS["FACILITY_ADMIN"] ?? [];
   return ALL_ITEMS[role as UserRole] ?? [];
 }
 
