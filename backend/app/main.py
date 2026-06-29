@@ -25,6 +25,7 @@ from app.routers import (
     
     # Admin users
     admin_users,
+    network_registry,
 )
 
 from app.seed import seed_database
@@ -100,6 +101,7 @@ app.include_router(members.router)
 app.include_router(health.router)
 app.include_router(admin_users.router)
 app.include_router(surveillance.router)
+app.include_router(network_registry.router)
 
 
 #to check the status of the backend

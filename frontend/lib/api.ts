@@ -35,6 +35,8 @@ export const referralsApi = {
     api.post(`/referrals/${id}/complete`, {}),
   registrySpecialists: (params?: Record<string, string | number>) =>
     api.get("/referrals/registry/specialists", { params }),
+  registryFacilities: (params?: Record<string, string | number>) =>
+    api.get("/referrals/registry/facilities", { params }),
 };
 
 

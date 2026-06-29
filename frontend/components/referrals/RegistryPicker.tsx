@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { referralsApi, facilitiesApi } from "@/lib/api";
+import { referralsApi } from "@/lib/api";
 import { Search, Building2, UserCheck, X } from "lucide-react";
 
 export type RegistryTarget =
@@ -61,8 +61,8 @@ export default function RegistryPicker({ value, onChange, excludeSpecialistId }:
         .catch(() => setSpecialists([]))
         .finally(() => setLoading(false));
     } else {
-      facilitiesApi
-        .list({ search: search || undefined, limit: 40 })
+      referralsApi
+        .registryFacilities({ search: search || undefined, limit: 40 } as Record<string, string | number>)
         .then((r) => setFacilities(r.data))
         .catch(() => setFacilities([]))
         .finally(() => setLoading(false));

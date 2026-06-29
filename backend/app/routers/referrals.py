@@ -719,6 +719,53 @@ def list_registry_specialists(
     ]
 
 
+@router.get("/registry/facilities", response_model=List[dict])
+def list_registry_facilities(
+    search: Optional[str] = Query(None),
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("referrals:read")),
+):
+    """Return only GASLID-approved active facilities for referral targeting."""
+    today = __import__("datetime").date.today()
+    eligible_ids = (
+        db.query(NetworkRegistry.facility_id)
+        .filter(
+            NetworkRegistry.entity_type == NetworkEntityType.FACILITY,
+            NetworkRegistry.verification_status == VerificationStatus.VERIFIED,
+            NetworkRegistry.registry_status == RegistryStatus.ACTIVE,
+            NetworkRegistry.membership_status == MembershipStatus.ACTIVE,
+            NetworkRegistry.approval_status == ApprovalStatus.APPROVED_BY_GASLID,
+            NetworkRegistry.expiry_date.isnot(None),
+            NetworkRegistry.expiry_date >= today,
+            NetworkRegistry.facility_id.isnot(None),
+        )
+        .subquery()
+    )
+    query = (
+        db.query(Facility)
+        .filter(
+            Facility.id.in_(eligible_ids),
+            Facility.deleted_at.is_(None),
+            Facility.is_active.is_(True),
+        )
+    )
+    if search:
+        query = query.filter(Facility.facility_name.ilike(f"%{search}%"))
+    results = query.order_by(Facility.facility_name).offset(skip).limit(limit).all()
+    return [
+        {
+            "id": f.id,
+            "facility_name": f.facility_name,
+            "facility_type": f.facility_type,
+            "city": f.city,
+            "region": f.region,
+        }
+        for f in results
+    ]
+
+
 @router.get("/outgoing", response_model=List[ReferralOut])
 def list_outgoing_referrals(
     status: Optional[str] = Query(None),
